@@ -3,6 +3,9 @@ import logging
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
+import dateutil
+from pytz import UTC
+
 from contentstore.course_info_model import get_course_updates
 from contentstore.views.certificates import CertificateManager
 from openedx.core.lib.api.view_utils import DeveloperErrorViewMixin, view_auth_classes
@@ -108,15 +111,12 @@ class CourseValidationView(DeveloperErrorViewMixin, GenericAPIView):
 
     def _assignments_validation(self, course, request):
         assignments, visible_assignments = self._get_assignments(course)
-        assignments_with_dates = [
-            a for a in visible_assignments if a.due
-        ]
 
         assignments_with_dates_before_start = (
             [
                 {'id': unicode(a.location), 'display_name': a.display_name}
-                for a in assignments_with_dates
-                if a.due < course.start
+                for a in visible_assignments
+                if (a.due and a.due < course.start) or self._has_ora_before_start(a, course.start, False)
             ]
             if self._has_start_date(course)
             else []
@@ -125,24 +125,19 @@ class CourseValidationView(DeveloperErrorViewMixin, GenericAPIView):
         assignments_with_dates_after_end = (
             [
                 {'id': unicode(a.location), 'display_name': a.display_name}
-                for a in assignments_with_dates
-                if a.due > course.end
+                for a in visible_assignments
+                if (a.due and a.due > course.end) or self._has_ora_after_end(a, course.end, False)
             ]
             if course.end
             else []
         )
 
         if get_bool_param(request, 'graded_only', False):
-            assignments_with_dates = [
-                a
-                for a in visible_assignments
-                if a.due and a.graded
-            ]
-
             assignments_with_dates_before_start = (
                 [
                     {'id': unicode(a.location), 'display_name': a.display_name}
-                    for a in assignments_with_dates if a.due < course.start
+                    for a in visible_assignments
+                    if (a.due and a.due < course.start) or self._has_ora_before_start(a, course.start, True)
                 ]
                 if self._has_start_date(course)
                 else []
@@ -151,11 +146,18 @@ class CourseValidationView(DeveloperErrorViewMixin, GenericAPIView):
             assignments_with_dates_after_end = (
                 [
                     {'id': unicode(a.location), 'display_name': a.display_name}
-                    for a in assignments_with_dates if a.due > course.end
+                    for a in visible_assignments
+                    if (a.due and a.due > course.end) or self._has_ora_after_end(a, course.end, True)
                 ]
                 if course.end
                 else []
             )
+        # de-dupe the two lists in case one has ended up in both
+        # I know this is inefficient
+        for item in assignments_with_dates_before_start:
+            for potential_duplicate in assignments_with_dates_after_end:
+                if item['id'] == potential_duplicate['id']:
+                    assignments_with_dates_after_end.remove(potential_duplicate)
 
         return dict(
             total_number=len(assignments),
@@ -206,6 +208,64 @@ class CourseValidationView(DeveloperErrorViewMixin, GenericAPIView):
             if not a.visible_to_staff_only
         ]
         return assignments, visible_assignments
+
+    def _get_open_responses(self, assignment):
+        store = modulestore()
+        verticals = [
+            store.get_item(vertical_usage_key)
+            for vertical_usage_key in assignment.children
+        ]
+        oras = [
+            store.get_item(item_usage_key)
+            for vertical in verticals
+            for item_usage_key in vertical.children
+            if 'type@openassessment' in str(item_usage_key)
+        ]
+        return oras
+
+    def _has_ora_before_start(self, assignment, start, graded_only):
+        oras = self._get_open_responses(assignment)
+        if graded_only:
+            graded_oras = [ora for ora in oras if ora.graded]
+            oras = graded_oras
+
+        for ora in oras:
+            if ora.submission_start:
+                if dateutil.parser.parse(ora.submission_start).replace(tzinfo=UTC) < start:
+                    return True
+            if ora.submission_due:
+                if dateutil.parser.parse(ora.submission_due).replace(tzinfo=UTC) < start:
+                    return True
+            for assessment in ora.rubric_assessments:
+                if assessment['start']:
+                    if dateutil.parser.parse(assessment['start']).replace(tzinfo=UTC) < start:
+                        return True
+                if assessment['due']:
+                    if dateutil.parser.parse(assessment['due']).replace(tzinfo=UTC) < start:
+                        return True
+        return False, False
+
+    def _has_ora_after_end(self, assignment, end, graded_only):
+        oras = self._get_open_responses(assignment)
+        if graded_only:
+            graded_oras = [ora for ora in oras if ora.graded]
+            oras = graded_oras
+
+        for ora in oras:
+            if ora.submission_start:
+                if dateutil.parser.parse(ora.submission_start).replace(tzinfo=UTC) > end:
+                    return True
+            if ora.submission_due:
+                if dateutil.parser.parse(ora.submission_due).replace(tzinfo=UTC) > end:
+                    return True
+            for assessment in ora.rubric_assessments:
+                if assessment['start']:
+                    if dateutil.parser.parse(assessment['start']).replace(tzinfo=UTC) > end:
+                        return True
+                if assessment['due']:
+                    if dateutil.parser.parse(assessment['due']).replace(tzinfo=UTC) > end:
+                        return True
+        return False
 
     def _has_start_date(self, course):
         return not course.start_date_is_still_default
