@@ -33,9 +33,8 @@ class Command(BaseCommand):
         csv_path = options['csv_path']
         with open(csv_path, 'rb') as csvfile:
             reader = csv.reader(csvfile)
-            rownum = 0
-            for row in reader:
-                if rownum > 0:
+            for counter, row in enumerate(reader):
+                if counter > 0:
                     username = row[1]
                     email = row[2]
                     course_key = row[3]
@@ -62,5 +61,3 @@ class Command(BaseCommand):
                             CourseEnrollment.unenroll(user, course_id, skip_refund=True)
                             msg = 'User {} has been un-enrolled from course {}'.format(username, course_key)
                             logger.info(msg)
-
-                rownum += 1
