@@ -19,7 +19,7 @@ class Command(BaseCommand):
     Un-enroll bulk users from the courses.
     It expect that the data will be provided in a csv file format with
     first row being the header and columns will be as follows:
-    user_id, username, email, course_id, is_verified, verification_date 
+    user_id, username, email, course_id, is_verified, verification_date
     """
 
     def add_arguments(self, parser):

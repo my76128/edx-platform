@@ -14,6 +14,7 @@ LOGGER_NAME = 'student.management.commands.bulk_unenroll'
 
 
 class BulkUnenrollTests(SharedModuleStoreTestCase):
+    """Test Bulk un-enroll command works fine for all test cases."""
     def setUp(self):
         super(BulkUnenrollTests, self).setUp()
         self.course = CourseFactory.create()
@@ -37,6 +38,7 @@ class BulkUnenrollTests(SharedModuleStoreTestCase):
             self.enrollments.append(CourseEnrollment.enroll(user, self.course.id, mode='audit'))
 
     def test_user_not_exist(self):
+        """Verify that warning user not exist is logged for non existing user."""
         with NamedTemporaryFile() as csv:
             csv.write("user_id,username,email,course_id\n")
             csv.writelines("111,test,test@example.com,course-v1:edX+DemoX+Demo_Course\n")
@@ -53,6 +55,7 @@ class BulkUnenrollTests(SharedModuleStoreTestCase):
                 )
 
     def test_invalid_course_key(self):
+        """Verify in case of invalid course key warning is logged."""
         with NamedTemporaryFile() as csv:
             csv.write("user_id,username,email,course_id\n")
             csv.writelines("111,amy,amy@pond.com,test_course\n")
@@ -69,6 +72,7 @@ class BulkUnenrollTests(SharedModuleStoreTestCase):
                 )
 
     def test_user_not_enrolled(self):
+        """Verify in case of user not enrolled in course warning is logged."""
         with NamedTemporaryFile() as csv:
             csv.write("user_id,username,email,course_id\n")
             csv.writelines("111,amy,amy@pond.com,course-v1:edX+DemoX+Demo_Course\n")
@@ -86,6 +90,7 @@ class BulkUnenrollTests(SharedModuleStoreTestCase):
                 )
 
     def test_bulk_un_enroll(self):
+        """Verify users are unenrolled using the command."""
         with NamedTemporaryFile() as csv:
             csv.write("user_id,username,email,course_id\n")
             csv.writelines(
