@@ -173,7 +173,7 @@ class CourseValidationView(DeveloperErrorViewMixin, GenericAPIView):
                 if course.start and self._has_date_before_start(ora, course.start):
                     parent_unit = modulestore().get_item(ora.parent)
                     parent_assignment = modulestore().get_item(parent_unit.parent)
-                    assignments_with_dates_before_start.append({
+                    assignments_with_ora_dates_before_start.append({
                         'id': unicode(parent_assignment.location),
                         'display_name': parent_assignment.display_name
                     })
