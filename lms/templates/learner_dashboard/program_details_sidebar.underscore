@@ -9,6 +9,8 @@
 </aside>
 <% if (programRecordUrl) { %>
     <aside class="aside js-program-record program-record">
+        <h2 class="progress-heading certificate-heading"><%- gettext('Program Record') %></h2> <!-- TODO: Check if this is the correct scss class for this, and verify it's feature flagged -->
+
         <a href="<%- programRecordUrl %>" class="program-record-link">
             <button class="btn program-record-button"><%- gettext('View Program Record') %></button>
         </a>
