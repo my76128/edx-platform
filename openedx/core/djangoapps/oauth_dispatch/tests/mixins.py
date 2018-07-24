@@ -41,7 +41,7 @@ class AccessTokenMixin(object):
             """
             keys = KEYS()
             if should_be_asymmetric_key:
-                keys.load_jwks(settings.JWT_AUTH['JWT_SIGNING_JWK_SET'])
+                keys.load_jwks(settings.JWT_AUTH['JWT_PUBLIC_SIGNING_JWK_SET'])
             else:
                 keys.add({'key': secret_key, 'kty': 'oct'})
 

@@ -274,7 +274,7 @@ class TestAccessTokenView(AccessTokenLoginMixin, mixins.AccessTokenMixin, _Dispa
 
             public_jwk_set, private_jwk = self._generate_key_pair()
             jwt_auth_settings = settings.JWT_AUTH
-            jwt_auth_settings.update({'JWT_PRIVATE_SIGNING_JWK': private_jwk, 'JWT_SIGNING_JWK_SET': public_jwk_set})
+            jwt_auth_settings.update({'JWT_PRIVATE_SIGNING_JWK': private_jwk, 'JWT_PUBLIC_SIGNING_JWK_SET': public_jwk_set})
             with override_settings(JWT_AUTH=jwt_auth_settings):
 
                 response = self._post_request(self.user, self.restricted_dot_app, token_type='jwt')

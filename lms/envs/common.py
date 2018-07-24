@@ -3173,7 +3173,7 @@ JWT_AUTH = {
 
     'JWT_SIGNING_ALGORITHM': 'RS512',
     'JWT_PRIVATE_SIGNING_JWK': 'change-me',
-    'JWT_SIGNING_JWK_SET': 'change-me',
+    'JWT_PUBLIC_SIGNING_JWK_SET': 'change-me',
 
     'JWT_ISSUER': 'change-me',
     'JWT_AUDIENCE': 'change-me',

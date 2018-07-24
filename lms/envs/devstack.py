@@ -230,7 +230,7 @@ CORS_ORIGIN_ALLOW_ALL = True
 
 ###################### JWTs ######################
 JWT_AUTH.update({
-    'JWT_ISSUER': 'http://127.0.0.1:8000/oauth2',
+    'JWT_ISSUER': OAUTH_OIDC_ISSUER,
     'JWT_AUDIENCE': 'lms-key',
 
     'JWT_SECRET_KEY': 'lms-secret',
@@ -248,7 +248,7 @@ JWT_AUTH.update({
         '9i1zqyboxgd0uAbxVDo6ohnlVqYLtap2tXXcavKm4C9MTpob_rk6FBfEuq4uSsuxFvCER4yG3CYBBa4gZVU", "kid": "devstack_key", "'
         'kty": "RSA"}'
     ),
-    'JWT_SIGNING_JWK_SET': (
+    'JWT_PUBLIC_SIGNING_JWK_SET': (
         '{"keys": [{"kid": "devstack_key", "e": "AQAB", "kty": "RSA", "n": "smKFSYowG6nNUAdeqH1jQQnH1PmIHphzBmwJ5vRf1vu'
         '48BUI5VcVtUWIPqzRK_LDSlZYh9D0YFL0ZTxIrlb6Tn3Xz7pYvpIAeYuQv3_H5p8tbz7Fb8r63c1828wXPITVTv8f7oxx5W3lFFgpFAyYMmROC'
         '4Ee9qG5T38LFe8_oAuFCEntimWxN9F3P-FJQy43TL7wG54WodgiM0EgzkeLr5K6cDnyckWjTuZbWI-4ffcTgTZsL_Kq1owa_J2ngEfxMCObnzG'

@@ -28,9 +28,7 @@ CREDENTIALS_PUBLIC_SERVICE_URL = 'http://localhost:18150'
 OAUTH_OIDC_ISSUER = '{}/oauth2'.format(LMS_ROOT_URL)
 
 JWT_AUTH.update({
-    'JWT_SECRET_KEY': 'lms-secret',
     'JWT_ISSUER': OAUTH_OIDC_ISSUER,
-    'JWT_AUDIENCE': 'lms-key',
 })
 
 FEATURES.update({
