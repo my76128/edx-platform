@@ -37,6 +37,7 @@ class CourseValidationView(DeveloperErrorViewMixin, GenericAPIView):
         * certificates
         * updates
         * graded_only (boolean) - whether to included graded subsections only in the assignments information.
+        * validate_oras (boolean) - whether to check the dates in ORA problems in addition to assignment due dates.
 
     **GET Response Values**
 
@@ -154,7 +155,7 @@ class CourseValidationView(DeveloperErrorViewMixin, GenericAPIView):
                 [
                     {'id': unicode(a.location), 'display_name': a.display_name}
                     for a in assignments_with_dates
-                    a.due > course.end
+                    if a.due > course.end
                 ]
                 if course.end
                 else []
@@ -166,6 +167,7 @@ class CourseValidationView(DeveloperErrorViewMixin, GenericAPIView):
             # Iterate over all ORAs to find any with dates outside
             # acceptable range
             for ora in self._get_open_responses(
+                course,
                 get_bool_param(request, 'graded_only', False)
             ):
                 if course.start and self._has_date_before_start(ora, course.start):
@@ -188,7 +190,7 @@ class CourseValidationView(DeveloperErrorViewMixin, GenericAPIView):
             total_visible=len(visible_assignments),
             assignments_with_dates_before_start=assignments_with_dates_before_start,
             assignments_with_dates_after_end=assignments_with_dates_after_end,
-            assignments_with_ora_dates_before_start=assignments_with_dates_before_start,
+            assignments_with_ora_dates_before_start=assignments_with_ora_dates_before_start,
             assignments_with_ora_dates_after_end=assignments_with_ora_dates_after_end,
         )
 
@@ -235,9 +237,9 @@ class CourseValidationView(DeveloperErrorViewMixin, GenericAPIView):
         ]
         return assignments, visible_assignments
 
-    def _get_open_responses(self, graded_only):
+    def _get_open_responses(self, course, graded_only):
         oras = modulestore().get_items(course.id, qualifiers={'category': 'openassessment'})
-        return oras if not graded_only else [ora in oras if ora.graded]
+        return oras if not graded_only else [ora for ora in oras if ora.graded]
 
     def _has_date_before_start(self, ora, start):
         if ora.submission_start:
