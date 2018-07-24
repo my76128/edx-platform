@@ -23,6 +23,8 @@ class AccessTokenMixin(object):
             access_token (str): JWT
             user (User): User whose information is contained in the JWT payload.
             (optional) should_be_expired: indicates if the passed in JWT token is expected to be expired
+            (optional) should_be_asymmetric_key: indicates if the JWT token should be signed with an
+                asymmetric key.
 
         Returns:
             dict: Decoded JWT payload

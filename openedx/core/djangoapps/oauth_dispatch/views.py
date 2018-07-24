@@ -146,13 +146,13 @@ class AccessTokenView(RatelimitMixin, _DispatchingView):
 
     def _get_jwt_builder(self, user, is_client_restricted):
         # If JWT scope enforcement is enabled, we need to sign tokens
-        # given to restricted application with a separate key which
+        # given to restricted applications with a different key which
         # other IDAs do not have access to. This prevents restricted
         # applications from getting access to API endpoints available
         # on other IDAs which have not yet been protected with the
         # scope-related DRF permission classes. Once all endpoints have
-        # been protected we can remove this check and enable all IDAs
-        # to use the same new (asymmetric) key.
+        # been protected, we can enable all IDAs to use the same new 
+        # (asymmetric) key.
         # TODO: ARCH-162
         use_asymmetric_key = ENFORCE_JWT_SCOPES.is_enabled() and is_client_restricted
 

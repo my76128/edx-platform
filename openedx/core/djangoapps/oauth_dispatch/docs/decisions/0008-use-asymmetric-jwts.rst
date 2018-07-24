@@ -52,6 +52,7 @@ All other OAuth Clients will be configured with only the Public key portion of t
 In order to support key rotation in a forward compatible manner, we will identify the asymmetric keys,
 using the `JSON Web Key (JWK)`_ standard's `"kid" (Key ID)`_ parameter.  When a `JSON Web Signature (JWS)`_
 is created to sign a JWT, its `"kid" header parameter`_ specifies which key was used to secure the JWS.
+The code examples below show this in action.
 
 .. _JSON Web Key (JWK): https://tools.ietf.org/html/draft-ietf-jose-json-web-key-36
 .. _`"kid" (Key ID)`: https://tools.ietf.org/html/draft-ietf-jose-json-web-key-36#section-4.5
@@ -93,7 +94,7 @@ Here is code for generating a keypair::
     rsa_key = RSA.generate(2048)
     rsa_jwk = jwk.RSAKey(kid="your_key_id", key=rsa_key)
 
-To serialize the **public key** in a `JWK Set`_::
+To serialize the **public key** in a `JSON Web Key Set (JWK Set)`_::
 
     public_keys = jwk.KEYS()
     public_keys.append(rsa_jwk)
@@ -128,8 +129,6 @@ and its sample output::
         "kid": "your_key_id",
         "kty": "RSA"
     }
-
-.. _JWK Set: https://tools.ietf.org/html/draft-ietf-jose-json-web-key-36#section-5
 
 Signing
 ~~~~~~~
