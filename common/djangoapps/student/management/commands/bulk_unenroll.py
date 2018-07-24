@@ -23,7 +23,7 @@ class Command(BaseCommand):
     """
 
     def add_arguments(self, parser):
-        parser.add_argument('-p','--csv_path',
+        parser.add_argument('-p', '--csv_path',
                             metavar='csv_path',
                             dest='csv_path',
                             required=True,
